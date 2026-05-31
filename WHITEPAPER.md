@@ -330,32 +330,44 @@ Stable Seed（稳定 seed）
 
 ## 8. Seed 格式模板
 
+Seed 由不可约四层核心（Principles / Growth Framework / Boundaries / Verification）加上工程扩展字段组成。
+
 ```text
 Seed Name: [名称]
-
+Seed Type: [task / environment / coding / business / meta]
+Target Domain: [适用范围]
 Goal: [抽象目标，not 具体操作]
 
 Principles:
 1. [不可变的决策原则]
-2. [...]
 
 Growth Framework:
-1. [观察] → 2. [判断] → 3. [行动] → 4. [验证] → 5. [分叉/收敛]
+1. Observe → [观察什么信号]
+2. Classify → [判断属于哪种情况]
+3. Choose → [选择最小路径]
+4. Act → [执行]
+5. Verify → [局部验证]
+6. Fallback → [失败时如何处理]
 
 Boundaries:
 1. [什么不能做]
-2. [什么时候停止]
-
-Success Condition:
-[什么叫"够好了"，不需要再优化]
+2. [什么时候需要人工确认]
+3. [什么时候停止]
 
 Verification:
-1. [局部验证方式]
-2. [最终验收标准]
+- Local: [每步验证方式]
+- Final: [什么叫"够好了"，自举/任务何时结束]
+- Failure: [失败报告格式]
 
 Failure Policy:
 1. [同类失败 N 次后停止]
 2. [输出当前环境、尝试路径、失败原因、建议]
+
+Promotion Criteria:
+[这个 seed 何时可被认定为 stable]
+
+Trace Requirements:
+[执行时必须记录什么数据，用于未来 refinement]
 ```
 
 ---
@@ -623,7 +635,7 @@ Boundaries:
 
 Verification:
 - Local: [每步验证方式]
-- Final: [最终验收标准]
+- Final: [什么叫"够好了"，自举/任务何时结束]
 - Failure: [失败报告格式]
 
 Promotion Criteria:
@@ -1297,26 +1309,28 @@ Seed（可迁移的生成规则）
 
 ### 和三个研究簇的关系
 
+已有 record-replay、demonstration learning、prompt optimization、recursive meta-prompting 和 self-improving agent 工作都触及了"从经验中改进行为"的一部分。因此，Operator Strategy Bootstrapping 不主张"递归结构本身是新的"。
+
+它关注的是一个更具体的闭环：人类 operator 如何操作 AI 的隐性策略，被记录为 trace，外部化为 skill，再压缩为 seed，并在受权限、验证、治理约束的 runtime 中变成新的 capability。
+
+因此，它的重点不是"AI 自己递归改进自己"，而是"人类操作 AI 的程序性知识被对象化，并成为下一层 AI capability 的构造材料"。
+
 **簇 A：Recursive Self-Improvement（RSI）**
 RSI 讨论 AI 改进自身模型、训练流程、架构。你的循环不在这里——你改的不是模型权重，而是**人类如何操作 AI 的程序性知识**。RSI 改训练层，你改操作层。
 
 **簇 B：Demonstration-Learning / Record-Replay**
-AgentRR（record → summary → replay）和 AppAgent（观察人类示范学习操作 app）与你的 trace/skill 流程接近。但偏差关键：它们压缩的是操作外部 app/GUI 的行为，且通常一次性固定；你的循环压缩的是**操作 AI 本身**的策略，且产出物会反过来成为下一轮的操作对象——跨层递归，簇 B 基本没做。
+AgentRR 和 AppAgent 捕获操作外部 app/GUI 的低层动作。你的循环压缩的是**操作 AI 本身**的策略——来源不同，抽象层级不同。
 
 **簇 C：Skill 外部化与治理**
-Agent Skills survey 明确提出：SAGE、SEAgent 等系统能让 agent 通过经验学习技能，但学到的技能是 model-internal 的，无法被检视、共享或治理。这与你的白皮书高度吻合。但你的理论不止于 skill governance——你还加了一个 **seed-level generative layer** 和 **operator recursion layer**。你的完整循环是：
+Agent Skills survey 与你的白皮书高度吻合。你的增量在于把 seed-level generative layer、operator strategy externalization 和 runtime governance 组合成一个完整框架。
 
-```
-operator trace → skill → seed → runtime → verifier → governance → higher-level capability
-```
+### 三点差异
 
-### 独特切口：操作对象的跨层上升
+Operator Strategy Bootstrapping 与已有工作的差异主要在三点：
 
-多数 record-replay 或 demonstration-learning 系统在**固定任务层**内压缩行为。
-
-Operator Strategy Bootstrapping 压缩的是**"人如何操作 AI 能力"的策略**，并把策略变成新 AI 能力；新能力又成为下一轮的操作对象。
-
-这是跨层递归，不是同层优化。
+1. **来源不同**：它从人类 operator 操作 AI 的程序性知识出发，而不是只优化 benchmark prompt 或固定 GUI 任务。
+2. **运行环境不同**：它假设能力在真实 runtime 中展开，需要 capability discovery、tool access、permissions、external knowledge 和 human handoff。
+3. **治理要求不同**：它把 independent verifier、trace store、trust level、skill governance、regression testing 作为核心组成，而不是假设存在一个干净、单一、低风险的优化 metric。
 
 ### Factorio 同构
 
